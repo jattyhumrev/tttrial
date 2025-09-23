@@ -1,0 +1,22 @@
+Hello HVNC Test!
+This is a test file with content to ensure notepad has visible text.
+Line 3: More content
+Line 4: Testing 123
+Line 5: HVNC should capture this text properly.
+
+IMPORTANT: This text should be visible in the HVNC client if capture is working correctly.
+
+If you see this text in the HVNC client, the system is working!
+If you see a white/black screen, there's a capture issue.
+
+Color testing:
+- Black text on white background should be clearly visible
+- This notepad window should show substantial content
+- The HVNC logs should show high content percentage
+
+Technical Details:
+- Server should capture RGB data with high content ratio
+- Client should decode and display this text clearly  
+- Frame analysis should show >50% non-black pixels
+
+END OF TEST CONTENT

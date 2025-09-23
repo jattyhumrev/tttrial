@@ -1,0 +1,25 @@
+🔍 HVNC Diagnostic Tool - Finding the Black Screen Issue
+=====================================================
+✅ Found notepad window: 0x10606
+📐 Window dimensions: 160x28
+✅ Got window DC: 0x901077f
+✅ Created compatible DC: 0xffffffff92010f2e
+✅ Created compatible bitmap: 0x2a0509cd
+✅ Selected bitmap into DC
+✅ BitBlt successful!
+🎨 Sample pixel at (10,10): 0xFFFFFF
+⚠️  Pixel is black/white - might indicate capture issue
+
+🔬 Testing PrintWindow (Option C method):
+✅ PrintWindow successful!
+🎨 PrintWindow pixel at (10,10): 0xFFFFFF
+
+📋 Diagnostic Summary:
+If you see ❌ BitBlt failed with Error 5 → Run as Administrator
+If you see ✅ BitBlt successful but black pixels → Capture method needs adjustment
+If you see ✅ PrintWindow successful → Option C should work with admin rights
+
+💡 Next steps:
+1. If BitBlt failed → Run as Administrator
+2. If capture works → The issue is in JPEG encoding/decoding
+3. If PrintWindow works → Option C is ready for testing

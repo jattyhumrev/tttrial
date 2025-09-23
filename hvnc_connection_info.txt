@@ -1,0 +1,11 @@
+HVNC Connection Information
+Host: 146.190.74.86
+SSH Port: 22
+Username: tunneluser
+Password: EuroFw19@a03ee
+
+SSH Tunnel Command:
+ssh -L 3390:127.0.0.1:5900 tunneluser@146.190.74.86
+
+Client Connection:
+hvnc-client --server 127.0.0.1:3390
