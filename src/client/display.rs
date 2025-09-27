@@ -133,7 +133,11 @@ impl DisplayManager {
             warn!("   This indicates the server capture is not working properly.");
         }
         
-        // Check if we need to resize the window
+        // Check for valid image size before resizing
+        if img_width <= 0 || img_height <= 0 {
+            error!("Invalid decoded image size: {}x{}", img_width, img_height);
+            return Err(HvncError::WindowResizeFailed(format!("Invalid size: {}x{}", img_width, img_height)));
+        }
         if self.config.auto_resize && (img_width != self.current_size.0 || img_height != self.current_size.1) {
             info!("Auto-resizing window from {}x{} to {}x{}", 
                   self.current_size.0, self.current_size.1, img_width, img_height);

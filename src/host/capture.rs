@@ -358,7 +358,11 @@ pub fn capture_window_with_desktop_context(window: WindowHandle, target_desktop:
 /// Prepare window for capture by forcing content rendering (CRITICAL FIX)
 fn prepare_window_for_capture(window: WindowHandle) -> Result<()> {
     info!("🔨 HVNC Fix: Preparing window for capture");
-    
+    // Validate window handle
+    if window.is_null() {
+        log::error!("prepare_window_for_capture: null window handle");
+        return Err(HvncError::WindowNotFound { title: "null".to_string() });
+    }
     unsafe {
         // Method 1: Force window to redraw all content including non-client areas
         let redraw_result = RedrawWindow(
@@ -367,13 +371,11 @@ fn prepare_window_for_capture(window: WindowHandle) -> Result<()> {
             ptr::null_mut(),
             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME
         );
-        
         if redraw_result != 0 {
             info!("✅ RedrawWindow succeeded");
         } else {
             warn!("⚠️ RedrawWindow failed: {}", GetLastError());
         }
-        
         // Method 2: Update window content
         let update_result = UpdateWindow(window);
         if update_result != 0 {
@@ -381,11 +383,9 @@ fn prepare_window_for_capture(window: WindowHandle) -> Result<()> {
         } else {
             warn!("⚠️ UpdateWindow failed: {}", GetLastError());
         }
-        
         // Method 3: Send WM_PAINT message to force painting
         let paint_result = SendMessageA(window, WM_PAINT, 0, 0);
         info!("🎨 SendMessage WM_PAINT result: {}", paint_result);
-        
         // Method 4: Small delay to allow rendering to complete
         Sleep(100); // 100ms delay for content rendering
         info!("⏳ Completed 100ms rendering delay");

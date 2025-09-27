@@ -54,14 +54,21 @@ pub struct AdvancedSection {
 /// Load configuration from TOML file
 pub fn load_config_from_file(file_path: &str) -> Result<ServerConfigToml> {
     if !Path::new(file_path).exists() {
+        log::error!("Configuration file not found: {}", file_path);
         return Err(HvncError::OperationFailed(format!("Configuration file not found: {}", file_path)));
     }
 
     let content = fs::read_to_string(file_path)
-        .map_err(|e| HvncError::OperationFailed(format!("Failed to read config file: {}", e)))?;
+        .map_err(|e| {
+            log::error!("Failed to read config file {}: {}", file_path, e);
+            HvncError::OperationFailed(format!("Failed to read config file: {}", e))
+        })?;
 
     let config: ServerConfigToml = toml::from_str(&content)
-        .map_err(|e| HvncError::OperationFailed(format!("Failed to parse config file: {}", e)))?;
+        .map_err(|e| {
+            log::error!("Failed to parse config file {}: {}", file_path, e);
+            HvncError::OperationFailed(format!("Failed to parse config file: {}", e))
+        })?;
 
     Ok(config)
 }

@@ -664,37 +664,61 @@ impl InputHandler {
         event: InputEvent,
     ) -> Result<()> {
         debug!("Processing input event: {:?}", event);
-        
+
+        // Validate window handle
+        if window.is_null() {
+            log::error!("Input event failed: null window handle");
+            return Err(HvncError::WindowNotFound { title: "null".to_string() });
+        }
+
         // Check rate limiting first
         if self.should_rate_limit() {
             debug!("Input event rate limited");
             return Ok(()); // Silently drop rate-limited events
         }
-        
+
         // Validate input event for security
         self.validate_input_event_security(&event)?;
-        
-        // Update statistics
-        self.update_statistics(&event);
-        
-        // Process the event
-        match event {
-            InputEvent::MouseClick { x, y, button } => {
-                // Handle as mouse down followed by mouse up
-                self.handle_mouse_click(window, x, y, button.clone(), true)?;
-                // Small delay between down and up
-                std::thread::sleep(Duration::from_millis(10));
-                self.handle_mouse_click(window, x, y, button, false)?;
+
+        // Additional fail-proof validation
+        match &event {
+            InputEvent::MouseClick { x, y, .. } | InputEvent::MouseMove { x, y } => {
+                if *x < 0 || *y < 0 || *x > MAX_SCREEN_WIDTH || *y > MAX_SCREEN_HEIGHT {
+                    log::warn!("Input event out of bounds: x={}, y={}", x, y);
+                    return Err(HvncError::InputCoordinateOutOfBounds { x: *x, y: *y });
+                }
             }
-            InputEvent::MouseMove { x, y } => {
-                self.handle_mouse_move(window, x, y)?;
-            }
-            InputEvent::KeyPress { keycode, pressed } => {
-                self.handle_keyboard_event(window, keycode, pressed)?;
+            InputEvent::KeyPress { keycode, .. } => {
+                if *keycode > 255 {
+                    log::warn!("Invalid keycode: {}", keycode);
+                    return Err(HvncError::InvalidKeycode { keycode: *keycode });
+                }
             }
         }
-        
-        Ok(())
+
+        // Update statistics
+        self.update_statistics(&event);
+
+        // Process the event with error recovery
+        let result = match event {
+            InputEvent::MouseClick { x, y, button } => {
+                self.handle_mouse_click(window, x, y, button.clone(), true)
+                    .and_then(|_| {
+                        std::thread::sleep(Duration::from_millis(10));
+                        self.handle_mouse_click(window, x, y, button, false)
+                    })
+            }
+            InputEvent::MouseMove { x, y } => {
+                self.handle_mouse_move(window, x, y)
+            }
+            InputEvent::KeyPress { keycode, pressed } => {
+                self.handle_keyboard_event(window, keycode, pressed)
+            }
+        };
+        if let Err(e) = &result {
+            log::error!("Input event processing failed: {:?}", e);
+        }
+        result
     }
     
     /// Process input event without security validation (for testing)
